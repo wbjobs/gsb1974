@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resource Hints 策略对比实验室</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Resource Hints · PerformanceObserver · Canvas</p>
+        <h1>预加载策略对比实验室</h1>
+        <p class="subtitle">在隔离的本地源上测量 preload、prefetch、preconnect、dns-prefetch 与无策略基线。</p>
+      </div>
+      <div class="status-pill" id="healthStatus">检查服务中…</div>
+    </header>
+
+    <main>
+      <section class="panel controls">
+        <h2>实验配置</h2>
+        <div class="control-grid">
+          <label>
+            迭代次数
+            <input id="iterations" type="number" min="1" max="10" value="3">
+          </label>
+          <label>
+            每策略资源数
+            <input id="resourceCount" type="number" min="1" max="60" value="8">
+          </label>
+          <label>
+            服务端延迟（ms）
+            <input id="delayMs" type="number" min="0" max="3000" step="10" value="120">
+          </label>
+          <label>
+            响应体积（KB）
+            <input id="sizeKb" type="number" min="0" max="256" value="1">
+          </label>
+          <label>
+            发现延迟（ms）
+            <input id="discoveryDelayMs" type="number" min="0" max="2000" step="20" value="180">
+          </label>
+          <label>
+            并发请求
+            <input id="concurrency" type="number" min="1" max="64" value="8">
+          </label>
+        </div>
+
+        <fieldset class="strategy-picker">
+          <legend>策略</legend>
+          <label><input type="checkbox" value="none" checked> 无策略</label>
+          <label><input type="checkbox" value="dns-prefetch" checked> dns-prefetch</label>
+          <label><input type="checkbox" value="preconnect" checked> preconnect</label>
+          <label><input type="checkbox" value="preload" checked> preload</label>
+          <label><input type="checkbox" value="prefetch" checked> prefetch</label>
+        </fieldset>
+
+        <div class="action-row">
+          <button id="runButton" class="primary">开始对比</button>
+          <button id="stopButton" disabled>停止</button>
+          <span id="runState" class="muted">尚未运行</span>
+        </div>
+        <progress id="progress" max="100" value="0"></progress>
+      </section>
+
+      <section class="notices" aria-live="polite">
+        <div id="warningBox" class="notice warning" hidden></div>
+        <div id="errorBox" class="notice error" hidden></div>
+      </section>
+
+      <section class="summary-grid" id="summaryGrid"></section>
+
+      <section class="panel chart-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Canvas 可视化</h2>
+            <p class="muted" id="chartCaption">选择指标查看不同策略的中位数和波动范围。</p>
+          </div>
+          <div class="segmented" role="tablist" aria-label="图表模式">
+            <button class="active" data-mode="comparison">耗时对比</button>
+            <button data-mode="waterfall">时间线</button>
+            <button data-mode="stability">稳定性</button>
+          </div>
+        </div>
+        <label class="metric-select">
+          指标
+          <select id="metricSelect"></select>
+        </label>
+        <div class="canvas-wrap">
+          <canvas id="chartCanvas" aria-label="Resource Hints 策略对比图"></canvas>
+          <div id="chartEmpty" class="chart-empty">运行实验后显示图表</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>策略明细</h2>
+          <div class="exports">
+            <button data-export="json" disabled>导出 JSON</button>
+            <button data-export="csv" disabled>导出 CSV</button>
+            <button data-export="png" disabled>导出 PNG</button>
+            <button data-export="html" disabled>导出 HTML 报告</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table id="resultTable">
+            <thead>
+              <tr>
+                <th>策略</th>
+                <th>中位数</th>
+                <th>P95</th>
+                <th>最小/最大</th>
+                <th>相对基线</th>
+                <th>成功/失败</th>
+                <th>长任务</th>
+                <th>异常</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel explain">
+        <h2>策略说明</h2>
+        <div class="explain-grid">
+          <article><h3>dns-prefetch</h3><p>提前解析域名，不建立 TCP/TLS 连接；收益主要体现在跨站 DNS 延迟。</p></article>
+          <article><h3>preconnect</h3><p>提前完成 DNS、TCP 和 TLS 握手；过量使用会占用连接和带宽。</p></article>
+          <article><h3>preload</h3><p>高优先级获取当前导航确定需要的资源，需要正确的 as 与 crossorigin。</p></article>
+          <article><h3>prefetch</h3><p>低优先级获取未来导航可能使用的资源；实际优先级和缓存行为依赖浏览器。</p></article>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "resource-hints-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Preload、prefetch、preconnect 与 dns-prefetch 策略对比实验台",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check src/app.js && node --check src/benchmark.js && node --check src/chart.js && node --check src/report.js && node --check src/format.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "resource-hints",
+    "preload",
+    "prefetch",
+    "preconnect",
+    "performance-observer",
+    "canvas"
+  ],
+  "license": "UNLICENSED"
+}
