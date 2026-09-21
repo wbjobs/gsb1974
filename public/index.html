@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<title>Resource Hints 策略对比实验台</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Resource Hints 策略对比实验台</h1>
+    <p class="subtitle">preload · prefetch · preconnect —— 策略对比 / Canvas 可视化 / 报告导出</p>
+  </div>
+  <div class="actions">
+    <button id="btn-run" class="primary">运行全部策略</button>
+    <button id="btn-rerun" disabled>重跑选中</button>
+    <button id="btn-export-json" disabled>导出 JSON</button>
+    <button id="btn-export-csv" disabled>导出 CSV</button>
+    <button id="btn-print" disabled>打印 / 存 PDF</button>
+  </div>
+</header>
+
+<section class="status-bar">
+  <div id="run-status" class="status">空闲。点击“运行全部策略”开始对比。</div>
+  <div class="legend">
+    <span><i class="sw css"></i>css</span>
+    <span><i class="sw js"></i>js</span>
+    <span><i class="sw img"></i>img</span>
+    <span><i class="sw cdn"></i>跨源(CDN)</span>
+    <span><i class="sw err"></i>异常</span>
+  </div>
+</section>
+
+<section class="grid">
+  <article class="card span2">
+    <h2>策略总耗时对比</h2>
+    <canvas id="chart-bars" height="260"></canvas>
+    <p class="hint">loadEventEnd 为页面加载完成时间；next-page 列为晚注入脚本的网络耗时（prefetch 命中缓存时接近 0）。</p>
+  </article>
+
+  <article class="card">
+    <h2>关键指标</h2>
+    <div id="metrics-table" class="metrics">
+      <p class="muted">尚未运行。</p>
+    </div>
+  </article>
+
+  <article class="card span3">
+    <div class="card-head">
+      <h2>资源加载瀑布图</h2>
+      <div id="strategy-tabs" class="tabs"></div>
+    </div>
+    <canvas id="chart-waterfall" height="340"></canvas>
+    <p class="hint">横轴为相对页面开始的毫秒数；条为资源 startTime → responseEnd，虚线为 load 事件。</p>
+  </article>
+
+  <article class="card span3">
+    <h2>策略说明</h2>
+    <div class="strategy-docs">
+      <div><strong>none</strong>：无任何提示，浏览器按默认优先级与发现顺序请求（基线）。</div>
+      <div><strong>preconnect</strong>：提前对模拟 CDN 源完成 DNS/TCP 连接（本站模拟 400ms 握手），连接被后续请求复用。</div>
+      <div><strong>preload</strong>：提前以正确优先级拉取关键 css/js/img，缩短关键资源“发现 → 请求”等待。</div>
+      <div><strong>prefetch</strong>：低优先级预热下一页资源；页面 load 后再注入该脚本，验证缓存命中。</div>
+      <div><strong>combined</strong>：preconnect + preload 组合，观察叠加收益。</div>
+    </div>
+  </article>
+
+  <article class="card span3">
+    <h2>异常与环境</h2>
+    <div id="error-log" class="error-log"><p class="muted">无异常。</p></div>
+  </article>
+</section>
+
+<footer class="footer">
+  数据来源：页面内 <code>PerformanceObserver</code>（resource / navigation / paint）· 可视化：原生 Canvas ·
+  服务器：Node 内置 http（主站 :3000 + 模拟 CDN :3001）
+</footer>
+
+<iframe id="harness" title="test harness" hidden></iframe>
+
+<script src="app.js"></script>
+</body>
+</html>
